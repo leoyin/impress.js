@@ -292,10 +292,21 @@
                 lastEntered = null;
             }
         };
-        
+        var xhr = function(url){
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("get",url,true);
+            return function(cb){
+                xmlhttp.onreadystatechange=function() {
+                    if (xmlhttp.readyState==4 && xmlhttp.status==200) 
+                        cb(xmlhttp.responseText); 
+                    }
+                xmlhttp.send();
+            }
+        }
         // `initStep` initializes given step element by reading data from its
         // data attributes and setting correct styles.
         var initStep = function ( el, idx ) {
+            //debugger;
             var data = el.dataset,
                 step = {
                     translate: {
@@ -317,7 +328,12 @@
             }
             
             stepsData["impress-" + el.id] = step;
-            
+             
+            if(data.url){
+                xhr(data.url)(function(text){
+                    el.innerHTML = text
+                })
+            }
             css(el, {
                 position: "absolute",
                 transform: "translate(-50%,-50%)" +
@@ -326,6 +342,7 @@
                            scale(step.scale),
                 transformStyle: "preserve-3d"
             });
+
         };
         
         // `init` API function that initializes (and runs) the presentation.
